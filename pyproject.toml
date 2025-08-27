@@ -108,6 +108,7 @@ dependencies = [ # Optional
   "checksumdir",
   "scandir",
   "pycocotools",
+  "requests>=2,<3",
   "retry"
 ]
 

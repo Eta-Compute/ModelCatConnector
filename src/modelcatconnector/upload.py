@@ -252,7 +252,7 @@ def upload_cli():
         log.getLogger().setLevel(log.DEBUG)
         print(f"{' Logging level: DEBUG ':=^30}")
 
-    platform_path = osp.join(Path.home(), f".{PROJECT_NAME.lower()}")
+    platform_path = osp.join(Path.home(), f".{PRODUCT_NAME.lower()}")
     with open(osp.join(platform_path, "config.json")) as fp:
         platform_config = json.load(fp)
     group_id = platform_config.get("group_id", None)

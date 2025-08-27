@@ -152,7 +152,7 @@ def run_setup(verbose: int = 0):
     print(
         f"\t`modelcat_validate` to check your dataset for errors and verify {PRODUCT_NAME} interoperability"
     )
-    print(f"\t`modelcat_uploat` to upload dataset to {PRODUCT_NAME} platform")
+    print(f"\t`modelcat_upload` to upload dataset to {PRODUCT_NAME} platform")
 
 
 def setup_cli():
