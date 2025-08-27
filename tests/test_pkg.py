@@ -1,12 +1,12 @@
 import unittest
-import aptosconnector
+import modelcatconnector
 import logging as log
 
 
 class TestPkg(unittest.TestCase):
     def test_version_attr(self):
-        self.assertTrue(hasattr(aptosconnector, "__version__"))
-        self.assertIsInstance(aptosconnector.__version__, str)
+        self.assertTrue(hasattr(modelcatconnector, "__version__"))
+        self.assertIsInstance(modelcatconnector.__version__, str)
 
 
 if __name__ == '__main__':

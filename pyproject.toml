@@ -10,7 +10,7 @@
 # There are some restrictions on what makes a valid project name
 # specification here:
 # https://packaging.python.org/specifications/core-metadata/#name
-name = "AptosConnector"  # Required
+name = "ModelCatConnector"  # Required
 
 # Versions should comply with PEP 440:
 # https://www.python.org/dev/peps/pep-0440/
@@ -22,7 +22,7 @@ version = "0.0.3"  # Required
 # This is a one-line description or tagline of what your project does. This
 # corresponds to the "Summary" metadata field:
 # https://packaging.python.org/specifications/core-metadata/#summary
-description = "A dataset validation and upload utility for Aptos"  # Optional
+description = "A dataset validation and upload utility for ModelCat"  # Optional
 
 # This is an optional longer description of your project that represents
 # the body of text which users will see when they visit PyPI.
@@ -51,7 +51,7 @@ license = {file = "LICENSE.txt"}
 # Note that this is a list of additional keywords, separated
 # by commas, to be used to assist searching for the distribution in a
 # larger catalog.
-keywords = ["aptos", "dataset", "connector", "upload"]  # Optional
+keywords = ["modelcat", "dataset", "connector", "upload"]  # Optional
 
 # This should be your name or the name of the organization who originally
 # authored the project, and a valid email address corresponding to the name
@@ -134,17 +134,16 @@ test = ["coverage"]
 # maintainers, and where to support the project financially. The key is
 # what's used to render the link text on PyPI.
 [project.urls]  # Optional
-"Homepage" = "https://github.com/Eta-Compute/AptosConnector"
-"Bug Reports" = "https://github.com/Eta-Compute/AptosConnector/issues"
-"Source" = "https://github.com/Eta-Compute/AptosConnector"
+"Homepage" = "https://github.com/Eta-Compute/ModelCatConnector"
+"Bug Reports" = "https://github.com/Eta-Compute/ModelCatConnector/issues"
+"Source" = "https://github.com/Eta-Compute/ModelCatConnector"
 
 # The following would provide a command line executable called `sample`
 # which executes the function `main` from this package when invoked.
 [project.scripts]  # Optional
-# aptos_connector = "aptosconnector:main"
-aptos_validate  = "aptosconnector.validate:validate_cli"
-aptos_upload    = "aptosconnector.upload:upload_cli"
-aptos_setup     = "aptosconnector.setup:setup_cli"
+modelcat_validate  = "modelcatconnector.validate:validate_cli"
+modelcat_upload    = "modelcatconnector.upload:upload_cli"
+modelcat_setup     = "modelcatconnector.setup:setup_cli"
 
 # This is configuration specific to the `setuptools` build backend.
 # If you are using a different build backend, you will need to change this.

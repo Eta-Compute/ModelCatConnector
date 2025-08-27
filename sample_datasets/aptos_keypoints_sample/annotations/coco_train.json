@@ -3,7 +3,7 @@
         "year": "2023",
         "version": "1.0.0",
         "description": "A subset of Single Image Single Person Dataset with Keypoints - Source: COCO 2014 Val Dataset",
-        "contributor": "Eta Compute",
+        "contributor": "ModelCat",
         "url": "https://cocodataset.org/#home",
         "date_created": "2023-07-14"
     },

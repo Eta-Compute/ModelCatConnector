@@ -1,6 +1,14 @@
-from aptosconnector.utils import run_cli_command
-from aptosconnector.utils.api import AptosClient, APIConfig, APTOS_URL, APIError
-from aptosconnector.utils.aws import check_awscli, check_aws_configuration
+from modelcatconnector.utils import run_cli_command
+from modelcatconnector.utils.consts import (
+    DEFAULT_AWS_FORMAT,
+    DEFAULT_AWS_REGION,
+    DEFAULT_AWS_PROFILE,
+    PROJECT_NAME,
+    PRODUCT_URL,
+    PRODUCT_NAME,
+)
+from modelcatconnector.utils.api import ProductAPIClient, APIConfig, APIError
+from modelcatconnector.utils.aws import check_awscli, check_aws_configuration
 from pathlib import Path
 import os.path as osp
 import os
@@ -9,13 +17,9 @@ import re
 import uuid
 from getpass_asterisk.getpass_asterisk import getpass_asterisk as getpass
 
-_DEFAULT_REGION = "us-east-2"
-_DEFAULT_FORMAT = "json"
-_DEFAULT_AWS_PROFILE = "aptos_user"
-
 
 def run_setup(verbose: int = 0):
-    print("Welcome to AptosConnector one-time setup wizzard.")
+    print(f"Welcome to {PROJECT_NAME} one-time setup wizard.")
     print("We'll get you started in just a few simple steps!")
     print("-" * 50)
     if not check_awscli():
@@ -30,36 +34,36 @@ def run_setup(verbose: int = 0):
         print("-" * 50)
 
     while 1:
-        aptos_group_id = input("Aptos Group ID: ")
+        group_id = input(f"{PRODUCT_NAME} Group ID: ")
         try:
-            uuid.UUID(str(aptos_group_id))
+            uuid.UUID(str(group_id))
             break
         except Exception:
             print(
-                "Oops... This does not look right. `Aptos Account ID` should be a valid UUID in XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX format"
+                f"Oops... This does not look right. `{PRODUCT_NAME} Account ID` should be a valid UUID in XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX format"
             )
 
     while 1:
-        aptos_oauth_token = getpass("Aptos OAuth Token: ")
-        if re.match(r"^\d+_[a-f0-9]{40}$", aptos_oauth_token):
+        oauth_token = getpass(f"{PRODUCT_NAME} OAuth Token: ")
+        if re.match(r"^\d+_[a-f0-9]{40}$", oauth_token):
             break
         print(
-            "Oops... This does not look right. `Aptos OAuth Token` should be an integer followed by an underscore, followed by a 40 character string e.g.: 1_1234567890abcdef1234567890abcdef12345678"
+            f"Oops... This does not look right. `{PRODUCT_NAME} OAuth Token` should be an integer followed by an underscore, followed by a 40 character string e.g.: 1_1234567890abcdef1234567890abcdef12345678"
         )
 
     # get the AWS access key credentials
     try:
         api_config = APIConfig(
-            base_url=APTOS_URL,
-            oauth_token=aptos_oauth_token,
+            base_url=PRODUCT_URL,
+            oauth_token=oauth_token,
         )
-        aptos_client = AptosClient(api_config)
-        creds = aptos_client.get_aws_access(aptos_group_id)
+        api_client = ProductAPIClient(api_config)
+        creds = api_client.get_aws_access(group_id)
 
         aws_access_key = creds["access_key_id"]
         aws_secret_access_key = creds["secret_access_key"]
     except APIError as ae:
-        print(f"Aptos API error: {ae}")
+        print(f"{PRODUCT_NAME} API error: {ae}")
         exit(1)
 
     # configure AWS CLI
@@ -74,9 +78,9 @@ def run_setup(verbose: int = 0):
             "configure",
             "set",
             "region",
-            _DEFAULT_REGION,
+            DEFAULT_AWS_REGION,
             "--profile",
-            _DEFAULT_AWS_PROFILE,
+            DEFAULT_AWS_PROFILE,
         ]
         run_cli_command(cmd, line_parser=append_fn)
         cmd = [
@@ -84,9 +88,9 @@ def run_setup(verbose: int = 0):
             "configure",
             "set",
             "format",
-            _DEFAULT_FORMAT,
+            DEFAULT_AWS_FORMAT,
             "--profile",
-            _DEFAULT_AWS_PROFILE,
+            DEFAULT_AWS_PROFILE,
         ]
         run_cli_command(cmd, line_parser=append_fn)
         cmd = [
@@ -96,7 +100,7 @@ def run_setup(verbose: int = 0):
             "aws_access_key_id",
             aws_access_key,
             "--profile",
-            _DEFAULT_AWS_PROFILE,
+            DEFAULT_AWS_PROFILE,
         ]
         run_cli_command(cmd, line_parser=append_fn)
         cmd = [
@@ -106,7 +110,7 @@ def run_setup(verbose: int = 0):
             "aws_secret_access_key",
             aws_secret_access_key,
             "--profile",
-            _DEFAULT_AWS_PROFILE,
+            DEFAULT_AWS_PROFILE,
         ]
         run_cli_command(cmd, line_parser=append_fn)
     except Exception as e:
@@ -122,33 +126,33 @@ def run_setup(verbose: int = 0):
     # checking access to S3
     print("Verifying AWS access...")
     # some retries to let the AWS access key propagate
-    from aptosconnector.utils.aws import check_s3_access
+    from modelcatconnector.utils.aws import check_s3_access
     try:
-        check_s3_access(aptos_group_id, verbose=verbose > 0)
+        check_s3_access(group_id, verbose=verbose > 0)
     except Exception:
         print("Verification failed... Please check your credentials or contact customer support.")
         exit(1)
     print("Verification successful.")
 
-    # create Aptos config file
-    aptos_config = {
-        "aptos_group_id": aptos_group_id,
-        "aptos_oauth_token": aptos_oauth_token,
+    # create the config file
+    product_config = {
+        "group_id": group_id,
+        "oauth_token": oauth_token,
     }
 
-    aptos_path = osp.join(Path.home(), ".aptos")
-    os.makedirs(aptos_path, exist_ok=True)
-    with open(osp.join(aptos_path, "config.json"), "w") as fp:
-        json.dump(aptos_config, fp, indent=4)
+    modelcat_path = osp.join(Path.home(), f".{PRODUCT_NAME.lower()}")
+    os.makedirs(modelcat_path, exist_ok=True)
+    with open(osp.join(modelcat_path, "config.json"), "w") as fp:
+        json.dump(product_config, fp, indent=4)
 
     print("-" * 50)
     print("Configuration complete.")
     print("")
     print("Now you can use:")
     print(
-        "\t`aptos_validate` to check your dataset for errors and verify Aptos interoperability"
+        f"\t`modelcat_validate` to check your dataset for errors and verify {PRODUCT_NAME} interoperability"
     )
-    print("\t`aptos_upload` to upload dataset to Aptos platform")
+    print(f"\t`modelcat_uploat` to upload dataset to {PRODUCT_NAME} platform")
 
 
 def setup_cli():

@@ -1014,8 +1014,8 @@ def validate_cli():
 
     args, _ = parser.parse_known_args()
 
-    aptosconnector_version = pkg_resources.get_distribution("aptosconnector").version
-    print(f'AptosConnector (v{aptosconnector_version}) - dataset validation utility'.center(100))
+    modelcatconnector_version = pkg_resources.get_distribution("modelcatconnector").version
+    print(f'ModelCatConnector (v{modelcatconnector_version}) - dataset validation utility'.center(100))
 
     if args.verbose:
         print(f"Validating dataset with args: {args}.")

@@ -1,7 +1,7 @@
 import logging as log
 import os
 import os.path as osp
-from aptosconnector.utils import hash_dataset, run_cli_command
+from modelcatconnector.utils import hash_dataset, run_cli_command
 import re
 import json
 import math
@@ -10,10 +10,17 @@ from tqdm import tqdm
 import argparse
 from pathlib import Path
 
-from aptosconnector.utils.api import APIConfig, APTOS_URL, AptosClient, APIError
+from modelcatconnector.utils.api import APIConfig, ProductAPIClient, APIError
+from modelcatconnector.utils.consts import (
+    PRODUCT_S3_BUCKET,
+    PRODUCT_NAME,
+    PRODUCT_URL,
+    PROJECT_NAME,
+    DEFAULT_AWS_PROFILE,
+)
 
-# from aptosconnector.utils.cli import CLICommandError
-from aptosconnector.utils.aws import check_aws_configuration, check_s3_access
+# from modelcatconnector.utils.cli import CLICommandError
+from modelcatconnector.utils.aws import check_aws_configuration, check_s3_access
 import pkg_resources
 
 
@@ -21,19 +28,19 @@ class DatasetUploader:
     def __init__(
         self,
         dataset_root_dir: str,
-        aptos_group_id: str,
-        aptos_oauth_token: str = None,
+        group_id: str,
+        oauth_token: str = None,
         ignore_validation: bool = False,
         verbose: int = 0,  # 1 for info, 2 for debug
     ):
         self.dataset_root = dataset_root_dir
-        self.aptos_group_id = aptos_group_id
+        self.group_id = group_id
         self.verbose = verbose
-        self.aptos_oauth_token = aptos_oauth_token
+        self.oauth_token = oauth_token
 
-        if not self.is_valid_uuid(self.aptos_group_id):
+        if not self.is_valid_uuid(self.group_id):
             print(
-                f'Provided `Aptos Group ID` ({self.aptos_group_id}) does not have a correct format. '
+                f'Provided `{PRODUCT_NAME} Group ID` ({self.group_id}) does not have a correct format. '
                 'It should be a valid UUID e.g. "461b1b66-8787-11ed-aff3-07f20767316e"'
             )
             exit(1)
@@ -53,10 +60,10 @@ class DatasetUploader:
         with open(osp.join(self.dataset_root, "dataset_infos.json")) as fp:
             self.dataset_infos = json.load(fp)
         self.dataset_name = self.normalize_ds_name(list(self.dataset_infos.keys())[0])
-        self.s3_uri = f"s3://aptos-data/account/{self.aptos_group_id}/datasets/{self.dataset_name}/"
+        self.s3_uri = f"s3://{PRODUCT_S3_BUCKET}/account/{self.group_id}/datasets/{self.dataset_name}/"
 
         try:
-            check_s3_access(self.aptos_group_id, verbose=self.verbose > 0)
+            check_s3_access(self.group_id, verbose=self.verbose > 0)
         except Exception:
             exit(1)
 
@@ -70,7 +77,7 @@ class DatasetUploader:
 
         if self.ignore_validation:
             log.warning(
-                "Signature validation skipped (overriden by user). You dataset may not work on Aptos"
+                f"Signature validation skipped (overriden by user). You dataset may not work on {PRODUCT_NAME}"
             )
             return True
 
@@ -116,7 +123,7 @@ class DatasetUploader:
             self.dataset_root,
             self.s3_uri,
             "--profile",
-            "aptos_user",
+            DEFAULT_AWS_PROFILE,
         ]
 
         print("")
@@ -143,31 +150,31 @@ class DatasetUploader:
             )
 
         try:
-            print("Registering dataset in Aptos platform...")
+            print(f"Registering dataset in {PRODUCT_NAME} platform...")
             api_config = APIConfig(
-                base_url=APTOS_URL,
-                oauth_token=self.aptos_oauth_token,
+                base_url=PRODUCT_URL,
+                oauth_token=self.oauth_token,
             )
-            aptos_client = AptosClient(api_config)
-            register_data = aptos_client.register_dataset(
+            api_client = ProductAPIClient(api_config)
+            register_data = api_client.register_dataset(
                 name=self.dataset_name,
                 s3_uri=self.s3_uri,
                 dataset_infos=self.dataset_infos,
             )
 
             print("Running Dataset Analysis immediately after registration...")
-            aptos_client.submit_dataset_analysis(
+            api_client.submit_dataset_analysis(
                 dataset_uri=self.s3_uri,
-                aptos_group_id=self.aptos_group_id,
+                group_id=self.group_id,
                 dataset_name=self.dataset_name,
             )
             print("-" * 100)
             print(
-                f"Dataset uploaded with uuid \'{register_data['uuid']}\'. You can view your dataset at: "
-                f"https://aptos.training/datasets/{self.aptos_group_id}/{self.dataset_name}"
+                f"Dataset uploaded with uuid '{register_data['uuid']}'. You can view your dataset at: "
+                f"{PRODUCT_URL}/datasets/{self.group_id}/{self.dataset_name}"
             )
         except APIError as ae:
-            print(f"Aptos API error: {ae}")
+            print(f"{PRODUCT_NAME} API error: {ae}")
             exit(1)
 
     @staticmethod
@@ -230,9 +237,8 @@ def upload_cli():
     args = parser.parse_args()
 
     print(
-        f'AptosConnector (v{pkg_resources.get_distribution("aptosconnector").version}) - dataset validation utility'.center(
-            100
-        )
+        f'{PROJECT_NAME} (v{pkg_resources.get_distribution("modelcatconnector").version}) '
+        f'- dataset validation utility'.center(100)
     )
     print("\n" + "-" * 100)
 
@@ -246,16 +252,16 @@ def upload_cli():
         log.getLogger().setLevel(log.DEBUG)
         print(f"{' Logging level: DEBUG ':=^30}")
 
-    aptos_path = osp.join(Path.home(), ".aptos")
-    with open(osp.join(aptos_path, "config.json")) as fp:
-        aptos_config = json.load(fp)
-    group_id = aptos_config.get("aptos_group_id", None)
-    oauth_token = aptos_config.get("aptos_oauth_token", None)
+    platform_path = osp.join(Path.home(), f".{PROJECT_NAME.lower()}")
+    with open(osp.join(platform_path, "config.json")) as fp:
+        platform_config = json.load(fp)
+    group_id = platform_config.get("group_id", None)
+    oauth_token = platform_config.get("oauth_token", None)
     log.info(f"Group ID: {group_id}")
 
     dsu = DatasetUploader(
-        aptos_group_id=group_id,
-        aptos_oauth_token=oauth_token,
+        group_id=group_id,
+        oauth_token=oauth_token,
         dataset_root_dir=args.dataset_path,
         verbose=args.verbose,
     )

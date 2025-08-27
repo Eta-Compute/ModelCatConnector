@@ -3,13 +3,13 @@
         "year": "2022",
         "version": "1.0.0",
         "description": "A person detection dataset: a subset of COCO 2017 train/val dataset",
-        "contributor": "Eta Compute",
+        "contributor": "ModelCat",
         "url": "https://cocodataset.org/#termsofuse",
         "date_created": "2022-12-16"
     },
     "licenses": [
         {
-            "url": "https://aptos.ml",
+            "url": "https://modelcat.ai",
             "id": 1,
             "name": "Creative Commons Attribution 4.0 License."
         }

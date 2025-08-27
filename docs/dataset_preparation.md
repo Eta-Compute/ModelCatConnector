@@ -1,6 +1,6 @@
 # Supported task types
 
-As of today the AptosConnector utility supports the following task types:
+As of today the ModelCatConnector utility supports the following task types:
 
 * Image classification
 * Object detection
@@ -8,7 +8,7 @@ As of today the AptosConnector utility supports the following task types:
 
 # Data preparation
 
-Your dataset needs to be structured in a certain way to be properly recognized by Aptos. All dataset items must be placed under a dataset root directory. Inside the dataset root you need to place following items:
+Your dataset needs to be structured in a certain way to be properly recognized by ModelCat. All dataset items must be placed under a dataset root directory. Inside the dataset root you need to place following items:
 
 * `dataset_infos.json` – high-level meta-description of your dataset
 * `annotations/` - directory containing splits/annotations
@@ -62,7 +62,7 @@ Example `dataset_infos.json` metafile for task classification for a cats and dog
     "aptos_classification_catsdogs_sample": { // the dataset name which will be visible on Aptos datasets page
         "description": "Sample dogs-vs-cats dataset\n", // Your dataset description
         "citation": "",
-        "homepage": "https://aptos.training/",
+        "homepage": "https://modelcat.ai/",
         "license": "",
         "post_processed": null,
         "supervised_keys": null,
@@ -118,7 +118,7 @@ Example below shows `dataset_infos.json` definition for object detection task.
     "aptos_objectdetection_sample": {
         "description": "Subset of COCO-dataset. Contains colored images, where each image contains a set of objects of one class i.e. person. Each object has a corresponding bounding box in format [x_min, y_min, width, height]\n",
         "citation": "",
-        "homepage": "https://aptos.training/",
+        "homepage": "https://modelcat.ai/",
         "license": "",
         "features": {
             "image": {
@@ -201,7 +201,7 @@ Example below shows `dataset_infos.json` definition for keypoints detection task
     "aptos_keypoints_upperbody_sample": {
         "description": "",
         "citation": "",
-        "homepage": "https://aptos.training/",
+        "homepage": "https://modelcat.ai/",
         "license": "",
         "features": {
             "image": {
@@ -296,7 +296,7 @@ Example below shows `dataset_infos.json` definition for keypoints detection task
 ```
 
 # Annotation files
-Aptos requires split files (train, validation and test) to be placed under the `/annotations` directory. Currently Aptos supports the **COCO JSON** format, which means that split files will also contain annotations. To avoid mistakes it is suggested to use the following naming scheme for your split files: `coco_train.json`, `coco_validation.json` and `coco_test.json` for train, validation and test respectively as referenced in the example dataset metafile. Each annotation contains an image path, relative to the `images/` directory
+ModelCat requires split files (train, validation and test) to be placed under the `/annotations` directory. Currently ModelCat supports the **COCO JSON** format, which means that split files will also contain annotations. To avoid mistakes it is suggested to use the following naming scheme for your split files: `coco_train.json`, `coco_validation.json` and `coco_test.json` for train, validation and test respectively as referenced in the example dataset metafile. Each annotation contains an image path, relative to the `images/` directory
 
 Example split file for a classification task (`coco_test.json`)
 
@@ -306,13 +306,13 @@ Example split file for a classification task (`coco_test.json`)
         "year": "2022",
         "version": "1.0",
         "description": "Converted from sample `dogs-vs-cats`",
-        "contributor": "Eta Compute",
-        "url": "https://aptos.training",
+        "contributor": "ModelCat",
+        "url": "https://modelcat.ai",
         "date_created": "2022-12-16"
     },
     "licenses": [
         {
-            "url": "https://aptos.training",
+            "url": "https://modelcat.ai",
             "id": 1,
             "name": "MIT License"
         }
@@ -465,13 +465,13 @@ Example split file for keypoints task (`coco_test.json`)
         "year": "2023",
         "version": "1.0.0",
         "description": "Single Image Single Person Dataset with Upper Body Keypoints - Source: COCO 2014 Val Dataset",
-        "contributor": "Eta Compute",
-        "url": "https://aptos.training",
+        "contributor": "ModelCat",
+        "url": "https://modelcat.ai",
         "date_created": "2023-07-14"
     },
     "licenses": [
         {
-            "url": "https://aptos.training",
+            "url": "https://modelcat.ai",
             "id": 1,
             "name": "MIT License"
         }

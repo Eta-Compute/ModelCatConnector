@@ -2,7 +2,8 @@ import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import json
 
-from aptosconnector.upload import DatasetUploader, upload_cli
+from modelcatconnector.upload import DatasetUploader, upload_cli
+from modelcatconnector.utils.consts import PRODUCT_S3_BUCKET
 
 
 class TestDatasetUploader(unittest.TestCase):
@@ -36,8 +37,8 @@ class TestDatasetUploader(unittest.TestCase):
         self.group_id = "12345678-1234-1234-1234-123456789012"
         self.oauth_token = "1_1234567890abcdef1234567890abcdef12345678"
 
-    @patch('aptosconnector.upload.check_aws_configuration')
-    @patch('aptosconnector.upload.osp.exists')
+    @patch('modelcatconnector.upload.check_aws_configuration')
+    @patch('modelcatconnector.upload.osp.exists')
     @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({"test_dataset": {
         "description": "Test dataset",
         "citation": "",
@@ -55,8 +56,8 @@ class TestDatasetUploader(unittest.TestCase):
         "builder_name": "test_builder",
         "dataset_size": 5000
     }}))
-    @patch('aptosconnector.upload.check_s3_access')
-    @patch('aptosconnector.upload.DatasetUploader.dataset_check')
+    @patch('modelcatconnector.upload.check_s3_access')
+    @patch('modelcatconnector.upload.DatasetUploader.dataset_check')
     def test_init_success(
             self, mock_dataset_check, mock_check_s3_access,
             mock_open, mock_exists, mock_check_aws_config
@@ -70,16 +71,16 @@ class TestDatasetUploader(unittest.TestCase):
         # Create uploader instance
         uploader = DatasetUploader(
             dataset_root_dir=self.dataset_root,
-            aptos_group_id=self.group_id,
-            aptos_oauth_token=self.oauth_token
+            group_id=self.group_id,
+            oauth_token=self.oauth_token
         )
 
         # Verify initialization
         self.assertEqual(uploader.dataset_root, self.dataset_root)
-        self.assertEqual(uploader.aptos_group_id, self.group_id)
-        self.assertEqual(uploader.aptos_oauth_token, self.oauth_token)
+        self.assertEqual(uploader.group_id, self.group_id)
+        self.assertEqual(uploader.oauth_token, self.oauth_token)
         self.assertEqual(uploader.dataset_name, "test_dataset")
-        self.assertEqual(uploader.s3_uri, f"s3://aptos-data/account/{self.group_id}/datasets/test_dataset/")
+        self.assertEqual(uploader.s3_uri, f"s3://{PRODUCT_S3_BUCKET}/account/{self.group_id}/datasets/test_dataset/")
 
         # Verify dependencies were checked
         mock_check_aws_config.assert_called_once()
@@ -87,8 +88,8 @@ class TestDatasetUploader(unittest.TestCase):
         mock_dataset_check.assert_called_once()
         mock_check_s3_access.assert_called_once()
 
-    @patch('aptosconnector.upload.check_aws_configuration')
-    @patch('aptosconnector.upload.osp.exists')
+    @patch('modelcatconnector.upload.check_aws_configuration')
+    @patch('modelcatconnector.upload.osp.exists')
     def test_init_invalid_uuid(self, mock_exists, mock_check_aws_config):
         """Test initialization with invalid UUID."""
         # Mock dependencies
@@ -99,15 +100,15 @@ class TestDatasetUploader(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             DatasetUploader(
                 dataset_root_dir=self.dataset_root,
-                aptos_group_id="invalid-uuid",
-                aptos_oauth_token=self.oauth_token
+                group_id="invalid-uuid",
+                oauth_token=self.oauth_token
             )
 
         # Verify exit code
         self.assertEqual(cm.exception.code, 1)
 
-    @patch('aptosconnector.upload.check_aws_configuration')
-    @patch('aptosconnector.upload.osp.exists')
+    @patch('modelcatconnector.upload.check_aws_configuration')
+    @patch('modelcatconnector.upload.osp.exists')
     def test_init_path_not_exists(self, mock_exists, mock_check_aws_config):
         """Test initialization with non-existent path."""
         # Mock dependencies
@@ -118,17 +119,17 @@ class TestDatasetUploader(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             DatasetUploader(
                 dataset_root_dir=self.dataset_root,
-                aptos_group_id=self.group_id,
-                aptos_oauth_token=self.oauth_token
+                group_id=self.group_id,
+                oauth_token=self.oauth_token
             )
 
         # Verify exit code
         self.assertEqual(cm.exception.code, 1)
 
-    @patch('aptosconnector.upload.osp.exists', return_value=True)
-    @patch('aptosconnector.upload.hash_dataset', return_value="test_sha_hash")
-    @patch('aptosconnector.upload.check_aws_configuration', return_value=True)
-    @patch('aptosconnector.upload.check_s3_access')
+    @patch('modelcatconnector.upload.osp.exists', return_value=True)
+    @patch('modelcatconnector.upload.hash_dataset', return_value="test_sha_hash")
+    @patch('modelcatconnector.upload.check_aws_configuration', return_value=True)
+    @patch('modelcatconnector.upload.check_s3_access')
     def test_dataset_check_success(self, mock_check_s3_access, mock_check_aws_config, mock_hash_dataset, mock_exists):
         """Test successful dataset check."""
         # Skip the actual dataset_check in the constructor
@@ -150,8 +151,8 @@ class TestDatasetUploader(unittest.TestCase):
                 # Create the uploader instance
                 uploader = DatasetUploader(
                     dataset_root_dir=self.dataset_root,
-                    aptos_group_id=self.group_id,
-                    aptos_oauth_token=self.oauth_token
+                    group_id=self.group_id,
+                    oauth_token=self.oauth_token
                 )
 
                 # Override the mocked dataset_check to test the actual method
@@ -166,22 +167,22 @@ class TestDatasetUploader(unittest.TestCase):
                 # hash_dataset is not called in dataset_check when validator_log exists
                 # and contains a valid signature, so we don't assert it here
 
-    @patch('aptosconnector.upload.run_cli_command')
-    @patch('aptosconnector.upload.AptosClient')
-    @patch('aptosconnector.upload.DatasetUploader.dataset_check', return_value=True)
-    @patch('aptosconnector.upload.check_aws_configuration', return_value=True)
-    @patch('aptosconnector.upload.osp.exists', return_value=True)
-    @patch('aptosconnector.upload.check_s3_access')
-    @patch('aptosconnector.upload.DatasetUploader._count_files', return_value=(10, 1000))
+    @patch('modelcatconnector.upload.run_cli_command')
+    @patch('modelcatconnector.upload.ProductAPIClient')
+    @patch('modelcatconnector.upload.DatasetUploader.dataset_check', return_value=True)
+    @patch('modelcatconnector.upload.check_aws_configuration', return_value=True)
+    @patch('modelcatconnector.upload.osp.exists', return_value=True)
+    @patch('modelcatconnector.upload.check_s3_access')
+    @patch('modelcatconnector.upload.DatasetUploader._count_files', return_value=(10, 1000))
     def test_upload_s3_success(
             self, mock_count_files, mock_check_s3_access, mock_exists,
-            mock_check_aws_config, mock_dataset_check, mock_aptos_client, mock_run_cli
+            mock_check_aws_config, mock_dataset_check, mock_api_client, mock_run_cli
     ):
         """Test successful S3 upload."""
         # Mock dependencies
         mock_client_instance = MagicMock()
         mock_client_instance.register_dataset.return_value = {"uuid": "test-uuid"}
-        mock_aptos_client.return_value = mock_client_instance
+        mock_api_client.return_value = mock_client_instance
 
         # Mock the file operations
         dataset_infos_mock = mock_open(read_data=json.dumps(self.mock_dataset_infos))
@@ -191,8 +192,8 @@ class TestDatasetUploader(unittest.TestCase):
             # Create uploader instance
             uploader = DatasetUploader(
                 dataset_root_dir=self.dataset_root,
-                aptos_group_id=self.group_id,
-                aptos_oauth_token=self.oauth_token
+                group_id=self.group_id,
+                oauth_token=self.oauth_token
             )
 
             # Run the upload
@@ -202,22 +203,22 @@ class TestDatasetUploader(unittest.TestCase):
         mock_run_cli.assert_called_once()
 
         # Verify API client was created and used
-        mock_aptos_client.assert_called_once()
+        mock_api_client.assert_called_once()
         mock_client_instance.register_dataset.assert_called_once_with(
             name="test_dataset",
-            s3_uri=f"s3://aptos-data/account/{self.group_id}/datasets/test_dataset/",
+            s3_uri=f"s3://{PRODUCT_S3_BUCKET}/account/{self.group_id}/datasets/test_dataset/",
             dataset_infos=self.mock_dataset_infos
         )
         mock_client_instance.submit_dataset_analysis.assert_called_once()
 
-    @patch('aptosconnector.upload.argparse.ArgumentParser.parse_args')
-    @patch('aptosconnector.upload.pkg_resources.get_distribution')
-    @patch('aptosconnector.upload.osp.join')
+    @patch('modelcatconnector.upload.argparse.ArgumentParser.parse_args')
+    @patch('modelcatconnector.upload.pkg_resources.get_distribution')
+    @patch('modelcatconnector.upload.osp.join')
     @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({
-        "aptos_group_id": "12345678-1234-1234-1234-123456789012",
-        "aptos_oauth_token": "1_1234567890abcdef1234567890abcdef12345678"
+        "group_id": "12345678-1234-1234-1234-123456789012",
+        "oauth_token": "1_1234567890abcdef1234567890abcdef12345678"
     }))
-    @patch('aptosconnector.upload.DatasetUploader')
+    @patch('modelcatconnector.upload.DatasetUploader')
     def test_upload_cli(self, mock_uploader, mock_file, mock_join, mock_get_dist, mock_parse_args):
         """Test the upload_cli function."""
         # Mock command line arguments
@@ -243,8 +244,8 @@ class TestDatasetUploader(unittest.TestCase):
 
         # Verify uploader was created and used
         mock_uploader.assert_called_once_with(
-            aptos_group_id=self.group_id,
-            aptos_oauth_token=self.oauth_token,
+            group_id=self.group_id,
+            oauth_token=self.oauth_token,
             dataset_root_dir=self.dataset_root,
             verbose=1
         )
