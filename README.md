@@ -119,7 +119,7 @@ Found 3693 files in the dataset: 505.73 MB
 Uploading file: tfds/tf_test-validation.tfrecord-00000-of-00001
 100%|███████████████████████████████████████████████████████████| 3693/3693 [02:25<00:00, 25.46it/s]
 ----------------------------------------------------------------------------------------------------
-Upload complete. You can view your dataset at: https://modelcat.ai/datasets/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX/tf_test
+Upload complete. You can view your dataset at: https://app.modelcat.ai/datasets/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX/tf_test
 ```
 
 ## Running tests

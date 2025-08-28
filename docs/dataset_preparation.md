@@ -62,7 +62,7 @@ Example `dataset_infos.json` metafile for task classification for a cats and dog
     "aptos_classification_catsdogs_sample": { // the dataset name which will be visible on Aptos datasets page
         "description": "Sample dogs-vs-cats dataset\n", // Your dataset description
         "citation": "",
-        "homepage": "https://modelcat.ai/",
+        "homepage": "https://app.modelcat.ai/",
         "license": "",
         "post_processed": null,
         "supervised_keys": null,
@@ -118,7 +118,7 @@ Example below shows `dataset_infos.json` definition for object detection task.
     "aptos_objectdetection_sample": {
         "description": "Subset of COCO-dataset. Contains colored images, where each image contains a set of objects of one class i.e. person. Each object has a corresponding bounding box in format [x_min, y_min, width, height]\n",
         "citation": "",
-        "homepage": "https://modelcat.ai/",
+        "homepage": "https://app.modelcat.ai/",
         "license": "",
         "features": {
             "image": {
@@ -201,7 +201,7 @@ Example below shows `dataset_infos.json` definition for keypoints detection task
     "aptos_keypoints_upperbody_sample": {
         "description": "",
         "citation": "",
-        "homepage": "https://modelcat.ai/",
+        "homepage": "https://app.modelcat.ai/",
         "license": "",
         "features": {
             "image": {
@@ -307,12 +307,12 @@ Example split file for a classification task (`coco_test.json`)
         "version": "1.0",
         "description": "Converted from sample `dogs-vs-cats`",
         "contributor": "ModelCat",
-        "url": "https://modelcat.ai",
+        "url": "https://app.modelcat.ai",
         "date_created": "2022-12-16"
     },
     "licenses": [
         {
-            "url": "https://modelcat.ai",
+            "url": "https://app.modelcat.ai",
             "id": 1,
             "name": "MIT License"
         }
@@ -466,12 +466,12 @@ Example split file for keypoints task (`coco_test.json`)
         "version": "1.0.0",
         "description": "Single Image Single Person Dataset with Upper Body Keypoints - Source: COCO 2014 Val Dataset",
         "contributor": "ModelCat",
-        "url": "https://modelcat.ai",
+        "url": "https://app.modelcat.ai",
         "date_created": "2023-07-14"
     },
     "licenses": [
         {
-            "url": "https://modelcat.ai",
+            "url": "https://app.modelcat.ai",
             "id": 1,
             "name": "MIT License"
         }
